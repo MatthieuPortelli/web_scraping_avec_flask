@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Résultats du scraping</title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Résultats du scraping</h1>
+
+        <p>{{ url }}</p>
+
+        <!-- Structure de la boîte modale -->
+        <div id="myModal" class="modal">
+            <span class="close">&times;</span>
+            <img class="modal-content" id="modalImage" src="" alt="Image">
+        </div>
+
+
+        <!-- Bouton de retour à la page d'accueil -->
+        <a href="/" class="return-link-button">Accueil</a>
+
+        <!-- Content -->
+        <div id="results-tab-content" class="tab-content">
+            <p>Possibilité de scraping supplémentaire dans <b>external_links</b></p>
+
+            <!-- Formulaire pour scraper une URL spécifique -->
+            <form id="scrape-form" method="post" action="/scrape">
+                <input type="hidden" id="url" name="url">
+            </form>
+
+            <!-- Visualisations -->
+            {% if most_common %}
+                <!-- Affichage des mots les plus courants -->
+                <details>
+                    <summary>Les 5 mots les plus courants</summary>
+                    <ul>
+                        {% for word, frequency in most_common %}
+                            <li>{{ word }} (Fréquence : {{ frequency }})</li>
+                        {% endfor %}
+                    </ul>
+                </details>
+                <!-- Affichage de l'histogramme -->
+                <details id="histogram-details">
+                    <summary>Histogramme des mots les plus courants</summary>
+                    <img src="{{ url_for('static', filename='visualizations/word_histogram.png') }}" alt="Histogramme des mots les plus courants">
+                </details>
+                <!-- Affichage du graphique en secteurs -->
+                <details id="pie-chart-details">
+                    <summary>Proportion des liens internes et externes</summary>
+                    <img src="{{ url_for('static', filename='visualizations/links_pie_chart.png') }}" alt="Proportion des liens internes et externes">
+                </details>
+            {% endif %}
+
+            <!-- Données -->
+            {% if scraped_data %}
+                {% for key, value in scraped_data.items() %}
+                    <details>
+                        <!-- Titre -->
+                        <summary>{{ key }}
+                            {% if value is iterable and not value is string %}
+                                ({{ value|length }})
+                            {% endif %}
+                        </summary>
+                        <!-- Contenu -->
+                        {% if value is iterable and not value is string %}
+                            <!-- external_links -->
+                            {% if key == "external_links" %}
+                                {% for item in value %}
+                                    {% if item.startswith("https://") %}
+                                        <p>{{ item }}</p>
+                                        <a href="#" class="scrape-link" data-url="{{ item }}">Scrapez ce lien</a>
+                                    {% else %}
+                                        <p>{{ item }}</p>
+                                    {% endif %}
+                                {% endfor %}
+                            <!-- images -->
+                            {% elif key == "images" %}
+                                {% for item in value %}
+                                    <p><a href="{{ item }}" class="image-link">{{ item }}</a></p>
+                                {% endfor %}
+                            <!-- others -->
+                            {% else %}
+                                {% for item in value %}
+                                    <p>{{ item }}</p>
+                                {% endfor %}
+                            {% endif %}
+                        {% else %}
+                            <p>{{ value }}</p>
+                        {% endif %}
+                    </details>
+                {% endfor %}
+            {% else %}
+                <p>Aucune donnée n'a été trouvée pour l'URL saisie.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- JS -->
+    <script>
+    // JavaScript pour ouvrir et fermer la boîte modale
+    var modal = document.getElementById("myModal");
+    var modalImage = document.getElementById("modalImage");
+
+    // Trouvez tous les liens d'image avec la classe "image-link" et ajoutez un gestionnaire d'événements
+    var imageLinks = document.querySelectorAll(".image-link");
+    imageLinks.forEach(function (link) {
+      link.addEventListener("click", function (e) {
+        e.preventDefault();
+        modal.style.display = "block";
+        modalImage.src = this.href;
+      });
+    });
+
+    // Fermez la boîte modale lorsque l'utilisateur clique sur la croix
+    var close = document.getElementsByClassName("close")[0];
+    close.addEventListener("click", function () {
+      modal.style.display = "none";
+    });
+
+    // JavaScript pour ouvrir le formulaire lorsque l'utilisateur clique sur un lien "Scrapez ce lien"
+    var scrapeForm = document.getElementById("scrape-form");
+    var urlInput = document.getElementById("url");
+
+    var scrapeLinks = document.querySelectorAll(".scrape-link");
+    scrapeLinks.forEach(function (link) {
+        link.addEventListener("click", function (e) {
+            e.preventDefault();
+            var clickedUrl = this.getAttribute("data-url");
+            urlInput.value = clickedUrl;
+            scrapeForm.submit();
+        });
+    });
+    </script>
+</body>
+</html>

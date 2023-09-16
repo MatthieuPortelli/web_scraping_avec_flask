@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Scraping Page</title>
+    <!-- Ajoutez un lien vers votre fichier CSS ici -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="accueil">
+    <div class="container">
+        <h1 class="accueil">Scraping Page</h1>
+        <form method="post" action="/scrape">
+            <input type="text" id="url" name="url" placeholder="Entrez l'URL à scraper" required>
+            <button type="submit">Scrape</button>
+        </form>
+    </div>
+</body>
+</html>
