@@ -10,8 +10,12 @@ def get_html_content(url):
     :return: Un objet BeautifulSoup représentant le contenu HTML ou un message d'erreur si une erreur survient.
     """
     try:
-        # Effectuez une requête HTTP GET pour récupérer le contenu de l'URL
-        response = requests.get(url)
+        # Définir un en-tête User-Agent pour simuler un navigateur Web
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
+        }
+        # Effectuez une requête HTTP GET avec l'en-tête défini
+        response = requests.get(url, headers=headers)
         # Vérifiez si la réponse a un code d'état HTTP 2xx (pas d'erreur)
         response.raise_for_status()
     except requests.exceptions.HTTPError as errhttp:
