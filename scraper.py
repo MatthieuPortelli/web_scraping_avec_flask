@@ -7,7 +7,7 @@ def get_html_content(url):
     Récupère le contenu HTML d'une URL en utilisant une requête HTTP GET.
 
     :param url: L'URL à scraper.
-    :return: Un objet BeautifulSoup représentant le contenu HTML ou None si une erreur survient.
+    :return: Un objet BeautifulSoup représentant le contenu HTML ou un message d'erreur si une erreur survient.
     """
     try:
         # Effectuez une requête HTTP GET pour récupérer le contenu de l'URL
@@ -15,25 +15,18 @@ def get_html_content(url):
         # Vérifiez si la réponse a un code d'état HTTP 2xx (pas d'erreur)
         response.raise_for_status()
     except requests.exceptions.HTTPError as errhttp:
-        print("Erreur 404 : Page non trouvée", errhttp)
-        return None
+        return f"Erreur HTTP - {errhttp}"
     except requests.exceptions.Timeout as errtimeout:
-        print("Délai de connexion expiré", errtimeout)
-        return None
+        return f"Délai de connexion expiré - {errtimeout}"
     except requests.exceptions.ConnectionError as errconnec:
-        print("Erreur de connexion", errconnec)
-        return None
+        return f"Erreur de connexion - {errconnec}"
     except requests.exceptions.InvalidURL as errinvalid:
-        print("L'URL fournie est invalide", errinvalid)
-        return None
+        return f"L'URL fournie est invalide - {errinvalid}"
     except IndexError as errindex:
-        print("Erreur d'index", errindex)
-        return None
+        return f"Erreur d'index - {errindex}"
     except requests.exceptions.RequestException as e:
-        print(f"Erreur sur le scraping, URL : {url}", e)
-        return None
+        return f"Erreur sur le scraping, URL : {url} - {e}"
     # Si aucune exception n'est levée, la requête a réussi
-    print(f"Scraping sur {url} réussi")
     # Obtenez le contenu de la réponse HTTP
     content = response.text
     # Utilisez BeautifulSoup pour analyser le contenu HTML
@@ -49,6 +42,10 @@ def scrape_page(soup, url):
     :param url: L'URL de la page scrapée.
     :return: Un dictionnaire contenant les données extraites ou None si une erreur survient.
     """
+    # Vérifiez si soup est None (c'est-à-dire si une erreur s'est produite lors de la récupération de la page)
+    if soup is None:
+        print(f"Erreur lors de la récupération de la page pour l'URL : {url}")
+        return None
     try:
         # Titre de la page
         title = soup.find('title').text if soup.find('title') else ''

@@ -32,6 +32,12 @@ def scrape():
         if url:
             try:
                 # Appelez la fonction pour obtenir les données
+                result = initialize_database_and_scrape_url(url)
+                if isinstance(result, str):
+                    # Gestion d'une erreur renvoyée par initialize_database_and_scrape_url
+                    error = result
+                    return render_template('error.html', error=error)
+                # Appelez la fonction pour obtenir les données
                 scraped_data, most_common, internal_links, external_links = initialize_database_and_scrape_url(url)
                 if scraped_data and most_common:
                     create_word_histogram(most_common)
@@ -59,4 +65,4 @@ def scrape():
 
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=True)

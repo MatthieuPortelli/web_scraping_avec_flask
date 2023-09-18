@@ -17,6 +17,9 @@ def initialize_database_and_scrape_url(url):
     create_tables(conn)
     # Appel à la fonction de scraping
     scraped_data = scrape_url(url)
+    if isinstance(scraped_data, str):
+        # Gestion d'une erreur renvoyée par scrape_url
+        return f"{scraped_data}"
     if scraped_data is None:
         return {'error': 'Une erreur s\'est produite lors du scraping de l\'URL.'}
     # Trouver les n mots les plus courants dans la page scrapée
@@ -34,14 +37,23 @@ def scrape_url(url):
     :param url: L'URL à scraper.
     :return: Un dictionnaire contenant les données scrapées. En cas d'erreur, None est renvoyé.
     """
+    result = get_html_content(url)
+    # Vérifiez si le résultat est une chaîne de caractères (message d'erreur)
+    if isinstance(result, str):
+        # Gestion d'une erreur renvoyée par get_html_content
+        return f"{result}"
     try:
-        soup = get_html_content(url)
+        soup = result
+        if soup is None:
+            return None  # Gestion d'erreur pour la récupération du contenu HTML
     except Exception as e:
         print(f"Une erreur s'est produite lors de la récupération du contenu HTML : {e}")
-        soup = None
+        return None
     try:
         scraped_data = scrape_page(soup, url)
+        if scraped_data is None:
+            return None  # Gestion d'erreur pour le scraping des données
     except Exception as e:
         print(f"Une erreur s'est produite lors du scraping des données : {e}")
-        scraped_data = None
+        return None
     return scraped_data
